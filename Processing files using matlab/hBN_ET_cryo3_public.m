@@ -1,8 +1,11 @@
 %% Preamble things
 
 
-addpath 'D:\BASOV\Matlab scripts'; % the path to your folder with relevant matlab scripts
-datafolder='.\DataFiles\221121_junhe\'; % a relative path to where the .gsf files are stored
+addpath '/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/Matlab Scripts'; % the path to your folder with relevant matlab scripts
+datafolder='/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/DataFiles/221121_junhe/'; % a relative path to where the .gsf files are stored
+imagefolder='/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/images/'
+processfolder = '/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/before process/'
+parameterfolder = '/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/process parameters/'
 % in a folder named DataFiles inside the same directory the .m file is in
 
 % these are just some colormaps, and are in the Matlab scripts folder
@@ -14,7 +17,7 @@ load('colororder_igor.mat');
 %% Data loading variables
 temps=[50]; % 
 %wns=[1450,1471,1472]; %if we just want to do some test 
-wns=readmatrix("file_wns.csv");
+wns=readmatrix('/Users/brian_z/Desktop/Research/ET_hBN_fitting/Processing files using matlab/DataFiles/221121_junhe/file_wns.csv');
 sets=[1,1,1]; %for now (for this to be used, we could similarly 
 % have a csv file that listed the number of sets for each wavenumber, and
 % load them in individually. this is currently being overwritten by the
@@ -24,7 +27,7 @@ sets=[1,1,1]; %for now (for this to be used, we could similarly
 temp=50; %forcing it to only be 50K files
 setnum=1; %and only the one labelled as _1
 dir='fwd'; %and only the forward direction
-chn='S4'; %and only channel S4
+chn='z'; %and only channel S4
 
 
 %% Load Data Files
@@ -85,7 +88,7 @@ end
 % if needed, we'll also plot the scans in a single tiled layout
 % comment all parts out for figures if not using
 fig_S4_raw=figure('Name','S4');
-p=tiledlayout('flow','TileSpacing','tight','Padding','tight');
+% p=tiledlayout('flow','TileSpacing','tight','Padding','tight');
 
 
 S4_shift_cell=cell([1,length(wns)]);
@@ -100,6 +103,12 @@ smoothnum=3; % in order to remove outliers and make this automatic matching
 
 
 for k=1:length(wns)
+%     filename_unshifted=sprintf("UN_hBN_ET_%gK_%g_%s_%s_%g.png",temp,wns(k),chn,dir,setnum);
+%     filepath_unshifted=strcat(imagefolder,filename_unshifted)
+%     filename_shifted=sprintf("S_hBN_ET_%gK_%g_%s_%s_%g.png",temp,wns(k),chn,dir,setnum);
+%     filepath_shifted=strcat(imagefolder,filename_shifted)
+%     data_shifted=sprintf("hBN_ET_%gK_%g_%s_%s_%g.csv",temp,wns(k),chn,dir,setnum);
+%     filepath_data=strcat(processfolder,data_shifted)
     % put the S4 into a temp array
     % put the x, y res into a temp values
     unshifted_mat=S4_cell{k};
@@ -113,18 +122,19 @@ for k=1:length(wns)
     xydim=dim_cell{k}*1e6; 
     
     %do the plotting here, if we want
-    nexttile(p);
+%     nexttile(p);
     s4=pcolor(xs_raw,ys_raw,unshifted_mat); %s4 is a temporary variable i'll regret eventually
     set(s4,'EdgeColor','none'); colormap(sky_cmap); %remove lines and change colormap
     pbaspect([xydim(1) xydim(2) 1]); %xydim(1) is x length, xydim(2) is y length
     set(gca,'Yticklabel',[],'Xticklabel',[]); %do not plot the numbers on axis
-    title(sprintf('%gcm-1',wns(j)));
+    title(sprintf('%gcm-1',wns(k)));
     %make a scale bar of 0.5um
     %since we know the x dimensions, and this has the correct dimensions
     %for aspect ratio: plot a line using these coordinates
     line([0.15 0.65],[xydim(2)/5 xydim(2)/5],'Color','White','LineWidth',1,'Marker','|');
     text(0.3,xydim(2)/5*2,'0.5um','Color','White','FontWeight','bold');
-    
+%     saveas(s4,filepath_unshifted)
+
    
 
     %do a bit of smoothing to hopefully remove outliers
@@ -168,21 +178,23 @@ for k=1:length(wns)
 
     %plot it, essentially same as above but now with the shifted plots
     
-    s=pcolor(shifted_mat);
-    set(s,'EdgeColor','none');
-    colormap('gray');
+%     s=pcolor(shifted_mat);
+%     set(s,'EdgeColor','none');
+%     colormap('gray');
 
-    nexttile(q);
-    s4_shift=pcolor(shifted_mat); %s4 is a temporary variable i'll regret eventually
+%     nexttile(p);
+    s4_shift=pcolor(xs_raw,ys_raw,shifted_mat); %s4 is a temporary variable i'll regret eventually
     set(s4_shift,'EdgeColor','none'); colormap(sky_cmap); %remove lines and change colormap
     pbaspect([xydim(1) xydim(2) 1]); %xydim(1) is x length, xydim(2) is y length
     set(gca,'Yticklabel',[],'Xticklabel',[]); %do not plot the numbers on axis
-    title(sprintf('%gcm-1',wns(j)));
+    title(sprintf('%gcm-1',wns(k)));
     %make a scale bar of 0.5um
     %since we know the x dimensions, and this has the correct dimensions
     %for aspect ratio: plot using dimensions
     line([0.15 0.65],[xydim(2)/5 xydim(2)/5],'Color','White','LineWidth',1,'Marker','|');
     text(0.3,xydim(2)/5*2,'0.5um','Color','White','FontWeight','bold');
+%     saveas(s4_shift,filepath_shifted)
+%     writematrix(shifted_mat, filepath_data)
     
    
     
@@ -202,6 +214,10 @@ xs_shift_cell=cell(size(wns)); %create a blank shell
 figure(); %we actually do want to plot this
 hold on;
 for a=1:length(wns)
+%     filename_shiftzeros = sprintf("shift_zeros/hBN_ET_%gK_%g_%s_%s_%g.csv",temp,wns(a),chn,dir,setnum);
+%     filepath_shiftzeros = strcat(parameterfolder,filename_shiftzeros)
+%     filename_xsshift = sprintf("xs_shift/hBN_ET_%gK_%g_%s_%s_%g.csv",temp,wns(a),chn,dir,setnum);
+%     filepath_xsshift = strcat(parameterfolder,filename_xsshift)
     % average all line-cuts: hopefully by this point everything looks good
     % at this point, we can possibly do an interpolation and double the
     % number of points? try with both
@@ -221,10 +237,13 @@ for a=1:length(wns)
     end
     xs_shift_cell{a}=xs_shift; %store it
 
+%     writematrix(xs_shift,filepath_xsshift)
+%     writematrix(shift_zeros(a),filepath_shiftzeros)
+
     plot(xs_shift,averaged_line);
 end
-leg_text=(num2str(wns')); %makes an array of each wavenumber but as a string
-legend(leg_text);
+% leg_text=(num2str(wns')); %makes an array of each wavenumber but as a string
+% legend(leg_text);
 hold off;
 
 %% Plot the colour plots seperately; do not need if already done above
@@ -304,33 +323,55 @@ for b=1:length(wns)
 
     
 end
-leg_text=(num2str(wns));
-legend(leg_text);
+% leg_text=(num2str(wns));
+% legend(leg_text);
 hold off;
 %% Waterfall each plot
 % and then we can compare where the peaks change, hopefully
 
 % just plot some of them...
 % makes it easier to handle
-wns_to_plot=[1461,1465,1467,1468,1469,1470,14705,1471,14715,1472,1473,1474,1475,1478,1479,1480,1481];
-figure();
-hold on;
-index=0;
-for j=1:length(wns)
+% wns_to_plot=[1461,1465,1467,1468,1469,1470,14705,1471,14715,1472,1473,1474,1475,1478,1479,1480,1481];
+% figure();
+% hold on;
+% index=0;
+% for j=1:length(wns)
+% 
+%     %don't show the wonky ones
+%     if ismember(wns(j),wns_to_plot)==0
+%         continue
+%     end
+%     xs_shift=xs_shift_cell{j}*1e6;
+%     line_normed=line_normed_cell{j};
+% 
+%     % plot them each w an offset
+%     plot(xs_shift,line_normed+0.3*index);
+%     index=index+1;
+% end
+% xlim([-1.2, 0.2]);
+% leg_text=(num2str(wns_to_plot'));
+% legend(leg_text);
+% hold off;
 
-    %don't show the wonky ones
-    if ismember(wns(j),wns_to_plot)==0
-        continue
-    end
-    xs_shift=xs_shift_cell{j}*1e6;
-    line_normed=line_normed_cell{j};
-
-    % plot them each w an offset
-    plot(xs_shift,line_normed+0.3*index);
-    index=index+1;
+result = zeros(size(wns))
+for c=1:length(wns)
+    x = xs_shift_cell{c}
+    y = line_normed_cell{c}
+    y = transpose(y)
+    f = fit(x,y,'smoothingspline')
+    x1 = x(1)
+    x2 = x(end)
+    x_points = linspace(x1,x2,10000)
+    y_points = feval(f,x_points)
+    [ypk,idx] = findpeaks(y_points)
+    xpk = x_points(idx)
+    cond = xpk>-0.03e-05 & xpk<-0.01e-05
+    ind = find(cond)
+    result(c) = xpk(ind)
+%     plot(f,x,y)
 end
-xlim([-1.2, 0.2]);
-leg_text=(num2str(wns_to_plot'));
-legend(leg_text);
-hold off;
 
+figure()
+plot(result)
+
+writematrix(S4_cell{18},"zdata_14735.csv")
